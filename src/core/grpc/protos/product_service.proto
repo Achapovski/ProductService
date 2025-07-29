@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package src.core.grpc.stubs;
+
+service ProductService{
+  rpc create_product (CreateProductRequest) returns (CreateProductResponse);
+  rpc get_product (GetProductByIdRequest) returns (ProductByIdResponse);
+  rpc get_products (GetProductListRequest) returns (ProductListResponse);
+  rpc update_product (UpdateProductRequest) returns (UpdateProductResponse);
+  rpc delete_product (DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+
+message CreateProductRequest{
+  string title = 2;
+  string description = 3;
+  string type = 4;
+  string color = 5;
+  string price = 6;
+  string material = 7;
+  string discount = 8;
+  string image_url = 9;
+}
+
+message CreateProductResponse{
+  ProductByIdResponse product = 1;
+}
+
+
+message GetProductByIdRequest{
+  string id = 1;
+}
+
+message ProductByIdResponse{
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string type = 4;
+  string color = 5;
+  string price = 6;
+  string material = 7;
+  string discount = 8;
+  string image_url = 9;
+}
+
+
+message GetProductListRequest{}
+
+message ProductListResponse{
+  repeated ProductByIdResponse products = 1;
+}
+
+
+message UpdateProductRequest{
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional string type = 4;
+  optional string color = 5;
+  optional string price = 6;
+  optional string material = 7;
+  optional string discount = 8;
+  optional string image_url = 9;
+}
+
+message UpdateProductResponse{
+  ProductByIdResponse product = 1;
+}
+
+
+message DeleteProductRequest{
+  string product_id = 1;
+}
+
+message DeleteProductResponse{
+  bool deleted = 1;
+}
