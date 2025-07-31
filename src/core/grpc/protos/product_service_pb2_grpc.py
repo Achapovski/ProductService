@@ -11,6 +11,7 @@ _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
+
     _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
@@ -35,30 +36,30 @@ class ProductServiceStub(object):
             channel: A grpc.Channel.
         """
         self.create_product = channel.unary_unary(
-                '/src.core.grpc.stubs.ProductService/create_product',
-                request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductRequest.SerializeToString,
-                response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductResponse.FromString,
-                _registered_method=True)
+            '/src.core.grpc.stubs.ProductService/create_product',
+            request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductRequest.SerializeToString,
+            response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductResponse.FromString,
+            _registered_method=True)
         self.get_product = channel.unary_unary(
-                '/src.core.grpc.stubs.ProductService/get_product',
-                request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductByIdRequest.SerializeToString,
-                response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductByIdResponse.FromString,
-                _registered_method=True)
+            '/src.core.grpc.stubs.ProductService/get_product',
+            request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductByIdRequest.SerializeToString,
+            response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductByIdResponse.FromString,
+            _registered_method=True)
         self.get_products = channel.unary_unary(
-                '/src.core.grpc.stubs.ProductService/get_products',
-                request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductListRequest.SerializeToString,
-                response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductListResponse.FromString,
-                _registered_method=True)
+            '/src.core.grpc.stubs.ProductService/get_products',
+            request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductListRequest.SerializeToString,
+            response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductListResponse.FromString,
+            _registered_method=True)
         self.update_product = channel.unary_unary(
-                '/src.core.grpc.stubs.ProductService/update_product',
-                request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductRequest.SerializeToString,
-                response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductResponse.FromString,
-                _registered_method=True)
+            '/src.core.grpc.stubs.ProductService/update_product',
+            request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductRequest.SerializeToString,
+            response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductResponse.FromString,
+            _registered_method=True)
         self.delete_product = channel.unary_unary(
-                '/src.core.grpc.stubs.ProductService/delete_product',
-                request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductRequest.SerializeToString,
-                response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductResponse.FromString,
-                _registered_method=True)
+            '/src.core.grpc.stubs.ProductService/delete_product',
+            request_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductRequest.SerializeToString,
+            response_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductResponse.FromString,
+            _registered_method=True)
 
 
 class ProductServiceServicer(object):
@@ -97,53 +98,53 @@ class ProductServiceServicer(object):
 
 def add_ProductServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'create_product': grpc.unary_unary_rpc_method_handler(
-                    servicer.create_product,
-                    request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductRequest.FromString,
-                    response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductResponse.SerializeToString,
-            ),
-            'get_product': grpc.unary_unary_rpc_method_handler(
-                    servicer.get_product,
-                    request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductByIdRequest.FromString,
-                    response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductByIdResponse.SerializeToString,
-            ),
-            'get_products': grpc.unary_unary_rpc_method_handler(
-                    servicer.get_products,
-                    request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductListRequest.FromString,
-                    response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductListResponse.SerializeToString,
-            ),
-            'update_product': grpc.unary_unary_rpc_method_handler(
-                    servicer.update_product,
-                    request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductRequest.FromString,
-                    response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductResponse.SerializeToString,
-            ),
-            'delete_product': grpc.unary_unary_rpc_method_handler(
-                    servicer.delete_product,
-                    request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductRequest.FromString,
-                    response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductResponse.SerializeToString,
-            ),
+        'create_product': grpc.unary_unary_rpc_method_handler(
+            servicer.create_product,
+            request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductRequest.FromString,
+            response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.CreateProductResponse.SerializeToString,
+        ),
+        'get_product': grpc.unary_unary_rpc_method_handler(
+            servicer.get_product,
+            request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductByIdRequest.FromString,
+            response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductByIdResponse.SerializeToString,
+        ),
+        'get_products': grpc.unary_unary_rpc_method_handler(
+            servicer.get_products,
+            request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.GetProductListRequest.FromString,
+            response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.ProductListResponse.SerializeToString,
+        ),
+        'update_product': grpc.unary_unary_rpc_method_handler(
+            servicer.update_product,
+            request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductRequest.FromString,
+            response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.UpdateProductResponse.SerializeToString,
+        ),
+        'delete_product': grpc.unary_unary_rpc_method_handler(
+            servicer.delete_product,
+            request_deserializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductRequest.FromString,
+            response_serializer=src_dot_core_dot_grpc_dot_protos_dot_product__service__pb2.DeleteProductResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'src.core.grpc.stubs.ProductService', rpc_method_handlers)
+        'src.core.grpc.stubs.ProductService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
     server.add_registered_method_handlers('src.core.grpc.stubs.ProductService', rpc_method_handlers)
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class ProductService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def create_product(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+                       target,
+                       options=(),
+                       channel_credentials=None,
+                       call_credentials=None,
+                       insecure=False,
+                       compression=None,
+                       wait_for_ready=None,
+                       timeout=None,
+                       metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
@@ -162,15 +163,15 @@ class ProductService(object):
 
     @staticmethod
     def get_product(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+                    target,
+                    options=(),
+                    channel_credentials=None,
+                    call_credentials=None,
+                    insecure=False,
+                    compression=None,
+                    wait_for_ready=None,
+                    timeout=None,
+                    metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
@@ -189,15 +190,15 @@ class ProductService(object):
 
     @staticmethod
     def get_products(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+                     target,
+                     options=(),
+                     channel_credentials=None,
+                     call_credentials=None,
+                     insecure=False,
+                     compression=None,
+                     wait_for_ready=None,
+                     timeout=None,
+                     metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
@@ -216,15 +217,15 @@ class ProductService(object):
 
     @staticmethod
     def update_product(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+                       target,
+                       options=(),
+                       channel_credentials=None,
+                       call_credentials=None,
+                       insecure=False,
+                       compression=None,
+                       wait_for_ready=None,
+                       timeout=None,
+                       metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
@@ -243,15 +244,15 @@ class ProductService(object):
 
     @staticmethod
     def delete_product(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+                       target,
+                       options=(),
+                       channel_credentials=None,
+                       call_credentials=None,
+                       insecure=False,
+                       compression=None,
+                       wait_for_ready=None,
+                       timeout=None,
+                       metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,

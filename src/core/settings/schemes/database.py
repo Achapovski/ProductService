@@ -15,6 +15,7 @@ class DataBaseSettings(BaseSettings, BaseSettingsConfigMixin):
 
     @property
     def dsn(self) -> PostgresDsn:
+        print(self.DATABASE)
         return PostgresDsn(
             f"{self.DRIVER}://{self.USER.get_secret_value()}:{self.PASSWORD.get_secret_value()}@{self.HOST}/{self.DATABASE}"
         )

@@ -23,6 +23,7 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
             .options(selectinload(Product.type))
             .options(selectinload(Product.collection))
             .options(selectinload(Product.categories))
+            .options(selectinload(Product.images))
         )
         product: Product = product_result.scalar_one_or_none()
         if product:
