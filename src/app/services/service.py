@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.grpc.protos import product_service_pb2_grpc, product_service_pb2
 from src.core.settings.schemes.grpc import GRPCSettings
-from src.products.domain.models.product import ProductUpdateModel, ProductCreateModel
+from src.products.domain.models.product import ProductSafeUpdateModel, ProductCreateModel
 from src.products.exceptions.constants import ErrorDetails as DomainErrorDetails
 from src.products.services.service import ProductService
 
@@ -46,7 +46,7 @@ class Service(product_service_pb2_grpc.ProductServiceServicer):
     async def update_product(self, request: Message, context: ServicerContext) -> None:
         product = await self.product_service.update_product(
             id_=request.id,
-            product=ProductUpdateModel.model_validate({key.name: value for key, value in request.ListFields()})
+            product=ProductSafeUpdateModel.model_validate({key.name: value for key, value in request.ListFields()})
         )
         if product:
             return product_service_pb2.UpdateProductResponse(product=product.model_dump_to_grps_obj())

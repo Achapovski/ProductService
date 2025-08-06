@@ -8,3 +8,5 @@ from src.products.domain.models.material import *
 
 ProductModel.model_rebuild()
 ProductSafeModel.model_rebuild()
+ProductUpdateModel.model_rebuild()
+ProductSafeUpdateModel.model_rebuild()

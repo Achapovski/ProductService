@@ -21,5 +21,11 @@ class ImageSafeModel(ImageCreateModel):
     product_image_title_prefix: HttpUrl
 
 
-class ImageRelModel(ImageModel):
-    product: "ProductModel"
+class ImagePostUrlMetaModel(BaseModel):
+    url: HttpUrl
+    fields: dict[str, str]
+
+
+class ImagePostUrlModel(BaseModel):
+    images: list[ImagePostUrlMetaModel]
+    prefix: str

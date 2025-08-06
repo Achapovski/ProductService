@@ -1,15 +1,15 @@
 from typing import Optional
 from uuid import uuid4, UUID
 
-from sqlalchemy import Result, select, update
+from sqlalchemy import Result, select, update, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
 
 from src.core.database.interfaces.repositories import SQLAlchemyAbstractRepository
-from src.core.interfaces.models import AbstractModel
 from src.products.adapters.models import Product, ProductColors, ProductMaterials, ProductCategories
-from src.products.domain.models import ProductMaterialAssociateModel, ProductCategoryAssociateModel
-from src.products.domain.models.product import ProductModel, ProductCreateModel, ProductColorAssociateModel
+from src.products.domain.models import ProductMaterialAssociateModel, ProductCategoryAssociateModel, ProductSafeUpdateModel
+from src.products.domain.models.product import ProductModel, ProductCreateModel, ProductColorAssociateModel, \
+    ProductUpdateModel
 from src.products.interfaces.repositories import ProductsAbstractRepository
 
 
@@ -17,6 +17,7 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
     async def add(self, model: ProductCreateModel) -> Optional[ProductModel]:
         product_result: Result = await self.session.execute(
             insert(Product).values(id=uuid4(), **model.model_dump(exclude={"colors", "materials", "categories"}))
+            .on_conflict_do_nothing()
             .returning(Product)
             .options(selectinload(Product.colors))
             .options(selectinload(Product.materials))
@@ -25,7 +26,7 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
             .options(selectinload(Product.categories))
             .options(selectinload(Product.images))
         )
-        product: Product = product_result.scalar_one_or_none()
+        product = self._get_domain_model_or_none(data=product_result, model=ProductModel)
         if product:
             await self.session.execute(
                 insert(ProductColors).values(
@@ -48,7 +49,7 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
                     ).model_associate_list()
                 )
             )
-        return ProductModel.model_validate(obj=product, from_attributes=True)
+        return product
 
     async def get(self, id_: UUID) -> Optional[ProductModel]:
         result: Result = await self.session.execute(
@@ -84,11 +85,53 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
             return [ProductModel.model_validate(obj=obj, from_attributes=True) for obj in data]
         return []
 
-    async def update(self, id_: UUID, data: dict) -> Optional[AbstractModel]:
+    async def update(self, id_: UUID, model: ProductUpdateModel) -> Optional[ProductModel]:
         result: Result = await self.session.execute(
-            update(Product).where(Product.id == id_).values(**data).returning(Product)
+            update(Product).where(Product.id == id_).values(
+                **model.model_dump(exclude={"colors", "materials", "categories"})
+            ).returning(Product)
+            .options(selectinload(Product.colors))
+            .options(selectinload(Product.materials))
+            .options(selectinload(Product.categories))
+            .options(selectinload(Product.collection))
+            .options(selectinload(Product.type))
+            .options(selectinload(Product.images))
         )
-        return self._get_domain_model_or_none(data=result, model=ProductModel)
+        product = self._get_domain_model_or_none(data=result, model=ProductModel)
+        if product:
+            if model.colors:
+                await self.session.execute(
+                    delete(ProductColors).where(ProductColors.product_id == product.id)
+                )
+                await self.session.execute(
+                    insert(ProductColors).values(
+                        ProductColorAssociateModel(
+                            product_ids=[product.id],
+                            color_ids=[color.id for color in model.colors]
+                        ).model_associate_list()))
+            if model.materials:
+                await self.session.execute(
+                    delete(ProductMaterials).where(ProductMaterials.product_id == product.id)
+                )
+                await self.session.execute(
+                    insert(ProductMaterials).values(
+                        ProductMaterialAssociateModel(
+                            product_ids=[product.id],
+                            material_ids=[material.id for material in model.materials]
+                        ).model_associate_list()))
+            if model.categories:
+                await self.session.execute(
+                    delete(ProductCategories).where(ProductCategories.product_id == product.id)
+                )
+                await self.session.execute(
+                    insert(ProductCategories).values(
+                        ProductCategoryAssociateModel(
+                            product_ids=[product.id],
+                            category_ids=[category.id for category in model.categories]
+                        ).model_associate_list()))
+
+            product = await self.get(id_=id_)
+        return product
 
     async def delete(self, id_: UUID) -> bool:
         result: Result = await self.session.execute(

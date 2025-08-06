@@ -14,4 +14,4 @@ class ProductNotFoundException(ProductException):
 
 class ProductAlreadyExistsException(ProductException):
     DETAIL = "Product already exists!"
-    STATUS_CODE = status.HTTP_422_UNPROCESSABLE_ENTITY
+    STATUS_CODE = status.HTTP_409_CONFLICT

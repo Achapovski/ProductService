@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request, HTTPException, status
 from pydantic import ValidationError
 
-from src.domains.products.exceptions.exceptions import ProductException
+from src.products.exceptions.exceptions import ProductException
 
 
-def exception(app: FastAPI):
+def register_exception_handlers(app: FastAPI):
     @app.exception_handler(ProductException)
     def handle_product_exception(request: Request, exc: ProductException):
         raise HTTPException(

@@ -14,6 +14,6 @@ class SQLAlchemyAbstractRepository(AbstractRepository, ABC):
 
     @staticmethod
     def _get_domain_model_or_none[T:Type[AbstractModel]](data: Result, model: T) -> Optional[Type[T]]:
-        if result := data.scalar_one_or_none():
+        if isinstance(data, Result) and (result := data.scalar_one_or_none()):
             return model.model_validate(result, from_attributes=True)
         return None

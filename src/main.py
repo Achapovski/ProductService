@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.app.entrypoints.dependencies import get_service
 from src.app.entrypoints.routes import router
+from src.app.exceptions.registrator import register_exception_handlers
 from src.core.brokers.kafka.connection import kafka_broker
 from src.infra.events.subscribers import kafka_router
 
@@ -21,6 +22,7 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=router)
+register_exception_handlers(app=app)
 kafka_broker.include_router(kafka_router)
 
 app.add_middleware(

@@ -16,7 +16,6 @@ async def kafka_subscriber(
         data: YandexCloudEvent,
         product_use_case: Annotated[ProductUseCase, Depends(get_product_use_case)]
 ):
-    # print(data)
     print(product_title := data.messages[0].details.object_id.split("/"))
     image = ImageCreateModel(title=product_title[-1], product_image_title_prefix=product_title[0])
     print(await product_use_case.attach_image_for_product(image=image))

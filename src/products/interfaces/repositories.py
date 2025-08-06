@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from src.core.interfaces.repositories import AbstractRepository
+from src.products.domain.models import ProductSafeUpdateModel
 from src.products.domain.models.category import CategoryModel, CategoryCreateModel
 from src.products.domain.models.collection import CollectionCreateModel, CollectionModel
 from src.products.domain.models.image import ImageModel, ImageCreateModel
@@ -30,7 +31,7 @@ class ProductsAbstractRepository(AbstractRepository, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update(self, id_: UUID, data: dict) -> Optional[ProductModel]:
+    async def update(self, id_: UUID, model: ProductSafeUpdateModel) -> Optional[ProductModel]:
         raise NotImplementedError
 
     @abstractmethod
