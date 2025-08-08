@@ -28,5 +28,4 @@ class ProductImageLoadingEvent(BaseModel):
 
 class YandexCloudEvent(BaseModel):
     messages: list[ProductImageLoadingEvent]
-
     model_config = ConfigDict(extra="ignore")

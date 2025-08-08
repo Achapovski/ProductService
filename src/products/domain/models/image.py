@@ -15,6 +15,11 @@ class ImageModel(ImageCreateModel):
     id: UUID
 
 
+class ImagePreCreateModel(BaseModel):
+    title: str = Field(min_length=2, max_length=100)
+    main: bool = Field(default=True)
+
+
 class ImageSafeModel(ImageCreateModel):
     main: bool
     title: str

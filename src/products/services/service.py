@@ -8,8 +8,10 @@ from src.products.domain.models import (ProductPreCreateModel, TypeCreateModel, 
                                         CollectionCreateModel, ImageCreateModel, ImageModel)
 from src.products.domain.models.color import ColorCreateModel, ColorModel
 from src.products.domain.models.product import (ProductModel, ProductCreateModel,
-                                                ProductSafeUpdateModel, ProductExistsParamsModel, ProductUpdateModel)
-from src.products.exceptions.exceptions import ProductAlreadyExistsException, ProductNotFoundException
+                                                ProductSafeUpdateModel, ProductExistsParamsModel, ProductUpdateModel,
+                                                MaterialModel, CategoryModel)
+from src.products.exceptions.exceptions import ProductAlreadyExistsException, ProductNotFoundException, \
+    ProductNothingForUpdateException
 from src.products.interfaces.units_of_work import ProductUnitOfWork
 
 
@@ -50,54 +52,62 @@ class ProductService:
     async def update_product(self, id_: UUID, product: ProductSafeUpdateModel) -> Optional[ProductModel]:
         async with self._uow as uow:
             if product.model_dump(exclude_none=True, exclude_unset=True, exclude_defaults=True):
-                colors = await self.add_colors(
-                    colors_list=product.colors,
-                    uow=uow
-                ) if product.colors else []
-                materials = await self.add_materials(
-                    materials_list=product.materials,
-                    uow=uow
-                ) if product.materials else []
-                categories = await self.add_categories(
-                    categories_list=product.categories,
-                    uow=uow
-                ) if product.categories else []
-                type_ = await uow.types.add(model=TypeCreateModel(title=product.type))
-                collection = await uow.collections.add(model=CollectionCreateModel(title=product.title))
+                colors = await self.add_colors(colors_list=product.colors, uow=uow)
+                materials = await self.add_materials(materials_list=product.materials, uow=uow)
+                categories = await self.add_categories(categories_list=product.categories, uow=uow)
+                type_ = await uow.types.add(model=TypeCreateModel(title=product.type)) if product.type else None
+                collection = await uow.collections.add(
+                    model=CollectionCreateModel(**product.collection.model_dump())
+                ) if product.collection else None
                 product_update_model = ProductUpdateModel(
                     colors=colors,
                     materials=materials,
                     categories=categories,
-                    type=type_,
-                    collection=collection,
+                    type_id=type_.id if type_ else None,
+                    collection_id=collection.id if collection else None,
                     **product.model_dump(exclude={"type", "collection", "colors", "materials", "categories"})
                 )
                 product = await uow.products.update(id_=id_, model=product_update_model)
-            if product:
-                await uow.commit()
-                return product
-            raise ProductNotFoundException()
+                if product:
+                    await uow.commit()
+                    return product
+                raise ProductNotFoundException()
+            raise ProductNothingForUpdateException()
 
     async def add_colors(
             self,
-            colors_list: list[ColorSafeModel | str],
+            colors_list: Optional[list[ColorSafeModel | str]],
             uow: ProductUnitOfWork = None
-    ) -> list[ColorModel]:
+    ) -> Optional[list[ColorModel]]:
+        if not colors_list:
+            return None
         model_list = [ColorCreateModel(title=color if isinstance(color, str) else color.title) for color in colors_list]
         if not uow:
             async with self._uow as uow:
                 return await uow.colors.add_many(model_list=model_list)
         return await uow.colors.add_many(model_list=model_list)
 
-    async def add_materials(self, materials_list: list[MaterialSafeModel | str], uow: ProductUnitOfWork = None):
-        model_list = [MaterialCreateModel(title=material if type(material) is str else material.title) for material in
-                      materials_list]
+    async def add_materials(
+            self,
+            materials_list: Optional[list[MaterialSafeModel | str]],
+            uow: ProductUnitOfWork = None
+    ) -> Optional[list[MaterialModel]]:
+        if not materials_list:
+            return None
+        model_list = [MaterialCreateModel(title=material if isinstance(material, str) else material.title) for material
+                      in materials_list]
         if not uow:
             async with self._uow as uow:
                 return await uow.materials.add_many(model_list=model_list)
         return await uow.materials.add_many(model_list=model_list)
 
-    async def add_categories(self, categories_list: list[CategorySafeModel | str], uow: ProductUnitOfWork = None):
+    async def add_categories(
+            self,
+            categories_list: Optional[list[CategorySafeModel | str]],
+            uow: ProductUnitOfWork = None
+    ) -> Optional[list[CategoryModel]]:
+        if not categories_list:
+            return None
         model_list = [CategoryCreateModel(title=category if type(category) is str else category.title) for category in
                       categories_list]
         if not uow:

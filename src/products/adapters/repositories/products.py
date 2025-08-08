@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from src.core.database.interfaces.repositories import SQLAlchemyAbstractRepository
 from src.products.adapters.models import Product, ProductColors, ProductMaterials, ProductCategories
-from src.products.domain.models import ProductMaterialAssociateModel, ProductCategoryAssociateModel, ProductSafeUpdateModel
+from src.products.domain.models import ProductMaterialAssociateModel, ProductCategoryAssociateModel
 from src.products.domain.models.product import ProductModel, ProductCreateModel, ProductColorAssociateModel, \
     ProductUpdateModel
 from src.products.interfaces.repositories import ProductsAbstractRepository
@@ -86,52 +86,52 @@ class SQLAlchemyProductsRepository(SQLAlchemyAbstractRepository, ProductsAbstrac
         return []
 
     async def update(self, id_: UUID, model: ProductUpdateModel) -> Optional[ProductModel]:
-        result: Result = await self.session.execute(
-            update(Product).where(Product.id == id_).values(
-                **model.model_dump(exclude={"colors", "materials", "categories"})
-            ).returning(Product)
-            .options(selectinload(Product.colors))
-            .options(selectinload(Product.materials))
-            .options(selectinload(Product.categories))
-            .options(selectinload(Product.collection))
-            .options(selectinload(Product.type))
-            .options(selectinload(Product.images))
+        dumped_model = model.model_dump(
+            exclude={"colors", "materials", "categories"},
+            exclude_none=True,
+            exclude_unset=True,
+            exclude_defaults=True,
         )
-        product = self._get_domain_model_or_none(data=result, model=ProductModel)
-        if product:
+        result: Result = await self.session.execute(
+            (
+                update(Product).where(Product.id == id_).values(**dumped_model).returning(Product.id)
+                if dumped_model else
+                select(Product.id).where(Product.id == id_)
+            )
+        )
+        if product_id := result.scalar_one_or_none():
             if model.colors:
                 await self.session.execute(
-                    delete(ProductColors).where(ProductColors.product_id == product.id)
+                    delete(ProductColors).where(ProductColors.product_id == product_id)
                 )
                 await self.session.execute(
                     insert(ProductColors).values(
                         ProductColorAssociateModel(
-                            product_ids=[product.id],
+                            product_ids=[product_id],
                             color_ids=[color.id for color in model.colors]
                         ).model_associate_list()))
             if model.materials:
                 await self.session.execute(
-                    delete(ProductMaterials).where(ProductMaterials.product_id == product.id)
+                    delete(ProductMaterials).where(ProductMaterials.product_id == product_id)
                 )
                 await self.session.execute(
                     insert(ProductMaterials).values(
                         ProductMaterialAssociateModel(
-                            product_ids=[product.id],
+                            product_ids=[product_id],
                             material_ids=[material.id for material in model.materials]
                         ).model_associate_list()))
             if model.categories:
                 await self.session.execute(
-                    delete(ProductCategories).where(ProductCategories.product_id == product.id)
+                    delete(ProductCategories).where(ProductCategories.product_id == product_id)
                 )
                 await self.session.execute(
                     insert(ProductCategories).values(
                         ProductCategoryAssociateModel(
-                            product_ids=[product.id],
+                            product_ids=[product_id],
                             category_ids=[category.id for category in model.categories]
                         ).model_associate_list()))
-
-            product = await self.get(id_=id_)
-        return product
+            return await self.get(id_=id_)
+        return None
 
     async def delete(self, id_: UUID) -> bool:
         result: Result = await self.session.execute(

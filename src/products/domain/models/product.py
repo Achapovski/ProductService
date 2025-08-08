@@ -21,6 +21,7 @@ CategorySafeModel = ForwardRef("CategorySafeModel")
 ImageModel = ForwardRef("ImageModel")
 ImageSafeModel = ForwardRef("ImageSafeModel")
 ImagePostUrlModel = ForwardRef("ImagePostUrlModel")
+ImagePreCreateModel = ForwardRef("ImagePreCreateModel")
 
 
 class ProductModel(BaseModel, AbstractModel):
@@ -63,6 +64,7 @@ class ProductSafeModel(ProductModel):
 
 
 class ProductSafeUpdateModel(BaseModel):
+    # id: UUID
     title: str | None = Field(min_length=3, max_length=45, default=None)
     description: str | None = Field(default=None)
     price: Decimal | None = Field(ge=Decimal("1.0"), default=None)
@@ -75,11 +77,11 @@ class ProductSafeUpdateModel(BaseModel):
 
 
 class ProductUpdateModel(ProductSafeUpdateModel):
-    collection: CollectionModel
-    type: TypeModel
-    colors: list["ColorModel"]
-    materials: list["MaterialModel"]
-    categories: list["CategoryModel"]
+    collection_id: UUID | None
+    type_id: UUID | None
+    colors: list["ColorModel"] | None
+    materials: list["MaterialModel"] | None
+    categories: list["CategoryModel"] | None
 
 
 class ProductPreCreateModel(BaseModel):
@@ -91,7 +93,7 @@ class ProductPreCreateModel(BaseModel):
     colors: list[str] = Field(repr=False, exclude=True)
     materials: list[str] = Field(repr=False, exclude=True)
     categories: list[str] = Field(repr=False, exclude=True)
-    # image_title_prefix: str = Field(min_length=2, max_length=100)
+    images: list["ImagePreCreateModel"] = Field(repr=False, exclude=True)
     price: Decimal = Field(ge=Decimal("1.0"))
     discount: Decimal = Field(default=Decimal("0.0"))
 

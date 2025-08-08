@@ -18,10 +18,10 @@ router = APIRouter()
 )
 async def create_product(
         product: ProductPreCreateModel,
-        images: Annotated[list[str], Body(embed=True)],
+        # images: Annotated[list[str], Body(embed=True)],
         product_use_case: Annotated[ProductUseCase, Depends(get_product_use_case)]
 ):
-    if product := await product_use_case.create_product(product=product, images=images):
+    if product := await product_use_case.create_product(product=product):
         return product
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -80,10 +80,9 @@ async def get_products(
 async def update_product(
         product_id: UUID,
         product: ProductSafeUpdateModel,
-        product_service: Annotated[ProductService, Depends(get_product_service)]
+        product_use_case: Annotated[ProductUseCase, Depends(get_product_use_case)]
 ) -> ProductSafeUpdateModel:
-    product = await product_service.update_product(id_=product_id, product=product)
-    return ProductSafeUpdateModel(**product.model_dump())
+    return await product_use_case.update_product(product_id=product_id, product=product)
 
 
 @router.delete(

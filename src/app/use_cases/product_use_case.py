@@ -1,14 +1,18 @@
 import asyncio
+from pathlib import Path
 from typing import Optional
 from uuid import uuid4, UUID
 from ulid import ULID
 
 from faststream.kafka import KafkaBroker
 from redis.asyncio import Redis
+from slugify import slugify
 
 from src.core.interfaces.storages import AbstractStorageClient
-from src.products.domain.models import ImageCreateModel, ImageModel, ProductSafeModel, ImagePostUrlModel
-from src.products.domain.models.product import ProductExistsParamsModel, ProductPreCreateModel, ProductModel
+from src.products.domain.models import ImageCreateModel, ImageModel, ProductSafeModel, ImagePostUrlModel, \
+    ImagePreCreateModel
+from src.products.domain.models.product import ProductExistsParamsModel, ProductPreCreateModel, ProductModel, \
+    ProductSafeUpdateModel
 from src.products.services.service import ProductService
 
 
@@ -28,9 +32,10 @@ class ProductUseCase:
     async def create_product(
             self,
             product: ProductPreCreateModel,
-            images: list[str]
+            # images: list[str]
     ) -> tuple[ProductSafeModel, ImagePostUrlModel]:
-        presign_urls = await self.generate_presign_post_urls(filenames=images)
+
+        presign_urls = await self.generate_presign_post_urls(filenames=product.images)
         created_product = await self.product_service.create_product(product=product, image_title_prefix=presign_urls.prefix)
         return ProductSafeModel(**created_product.model_dump()), presign_urls
 
@@ -51,6 +56,10 @@ class ProductUseCase:
                 )
         return [ProductSafeModel.model_validate(obj=product, from_attributes=True) for product in products]
 
+    async def update_product(self, product_id: UUID, product: ProductSafeUpdateModel) -> ProductSafeUpdateModel:
+        product = await self.product_service.update_product(id_=product_id, product=product)
+        return ProductSafeUpdateModel(**product.model_dump())
+
     async def get_product_attrs(self) -> Optional[ProductExistsParamsModel]:
         product_attrs = await self.product_service.get_product_attrs()
         return product_attrs
@@ -59,10 +68,11 @@ class ProductUseCase:
         image = await self.product_service.create_product_image(model=image)
         return image
 
-    async def generate_presign_post_urls(self, filenames: list[str]) -> ImagePostUrlModel:
+    async def generate_presign_post_urls(self, filenames: list[ImagePreCreateModel]) -> ImagePostUrlModel:
         prefix = uuid4()
+        filenames = [slugify(Path(name.title).stem) if Path(name.title) else slugify(name.title) for name in filenames]
         images = await asyncio.gather(
-            *[self.obj_storage.object_post_url(key=f"{prefix}/{ULID()}.{f.split(".")[-1]}") for f in filenames]
+            *[self.obj_storage.object_post_url(key=f"{prefix}/{ULID()}.{name}") for name in filenames]
         )
         return ImagePostUrlModel(images=images, prefix=str(prefix))
 
